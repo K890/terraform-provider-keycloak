@@ -434,6 +434,24 @@ func (keycloakClient *KeycloakClient) post(ctx context.Context, path string, req
 	return body, location, err
 }
 
+func (keycloakClient *KeycloakClient) postRaw(ctx context.Context, path string, requestBody interface{}) ([]byte, string, error) {
+	resourceUrl := keycloakClient.baseUrl + path
+
+	payload, err := keycloakClient.marshal(requestBody)
+	if err != nil {
+		return nil, "", err
+	}
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, resourceUrl, nil)
+	if err != nil {
+		return nil, "", err
+	}
+
+	body, location, err := keycloakClient.sendRequest(ctx, request, payload)
+
+	return body, location, err
+}
+
 func (keycloakClient *KeycloakClient) put(ctx context.Context, path string, requestBody interface{}) error {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
