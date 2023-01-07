@@ -7,9 +7,12 @@ import (
 )
 
 type Account struct {
-	Id          string              `json:"id,omitempty"`
+	AccountId   string              `json:"id,omitempty"`
 	RealmId     string              `json:"-"`
 	Name        string              `json:"name"`
+	Attributes  map[string]string   `json:"attrs"`
+	Apps        []string 			`json:"apps,omitempty"`
+	CreatedOn   int					`json:"createdOn,omitempty"`
 }
 
 func (keycloakClient *KeycloakClient) NewAccount(ctx context.Context, account *Account) error {
@@ -17,7 +20,7 @@ func (keycloakClient *KeycloakClient) NewAccount(ctx context.Context, account *A
 	var err error
 	var body []byte
 
-	body, _, err = keycloakClient.postRaw(ctx, createAccountUrl, account)
+	body, _, err = keycloakClient.postWithoutAdmin(ctx, createAccountUrl, account)
 	if err != nil {
 		return err
 	}
@@ -32,7 +35,7 @@ func (keycloakClient *KeycloakClient) NewAccount(ctx context.Context, account *A
 func (keycloakClient *KeycloakClient) GetAccount(ctx context.Context, realmId, id string) (*Account, error) {
 	var account Account
 
-	err := keycloakClient.get(ctx, fmt.Sprintf("/realms/%s/accounts/%s", realmId, id), &account, nil)
+	err := keycloakClient.getWithoutAdmin(ctx, fmt.Sprintf("/realms/%s/api/v1/accounts/%s", realmId, id), &account, nil)
 	if err != nil {
 		return nil, err
 	}

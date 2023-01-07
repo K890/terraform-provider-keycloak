@@ -383,6 +383,35 @@ func (keycloakClient *KeycloakClient) get(ctx context.Context, path string, reso
 	return json.Unmarshal(body, resource)
 }
 
+func (keycloakClient *KeycloakClient) getWithoutAdmin(ctx context.Context, path string, resource interface{}, params map[string]string) error {
+	body, err := keycloakClient.getRawWithoutAdmin(ctx, path, params)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(body, resource)
+}
+
+func (keycloakClient *KeycloakClient) getRawWithoutAdmin(ctx context.Context, path string, params map[string]string) ([]byte, error) {
+	resourceUrl := keycloakClient.baseUrl + path
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, resourceUrl, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		query := url.Values{}
+		for k, v := range params {
+			query.Add(k, v)
+		}
+		request.URL.RawQuery = query.Encode()
+	}
+
+	body, _, err := keycloakClient.sendRequest(ctx, request, nil)
+	return body, err
+}
+
+
 func (keycloakClient *KeycloakClient) getRaw(ctx context.Context, path string, params map[string]string) ([]byte, error) {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
 
@@ -434,7 +463,7 @@ func (keycloakClient *KeycloakClient) post(ctx context.Context, path string, req
 	return body, location, err
 }
 
-func (keycloakClient *KeycloakClient) postRaw(ctx context.Context, path string, requestBody interface{}) ([]byte, string, error) {
+func (keycloakClient *KeycloakClient) postWithoutAdmin(ctx context.Context, path string, requestBody interface{}) ([]byte, string, error) {
 	resourceUrl := keycloakClient.baseUrl + path
 
 	payload, err := keycloakClient.marshal(requestBody)
