@@ -42,3 +42,12 @@ func (keycloakClient *KeycloakClient) GetAccount(ctx context.Context, realmId, i
 
 	return &account, nil
 }
+
+func (keycloakClient *KeycloakClient) DeleteAccount(ctx context.Context, realm_id, id string) error {
+	return keycloakClient.deleteWithoutAdmin(ctx, fmt.Sprintf("/realms/%s/api/v1/accounts/%s", realm_id, id), nil)
+}
+
+func (keycloakClient *KeycloakClient) UpdateAccount(ctx context.Context, account *Account) error {
+
+	return keycloakClient.putWithoutAdmin(ctx, fmt.Sprintf("/realms/%s/api/v1/accounts/%s", account.RealmId, account.AccountId), nil)
+}

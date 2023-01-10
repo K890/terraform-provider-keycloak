@@ -26,7 +26,7 @@ func resourceKeycloakAccount() *schema.Resource {
 			"name": {
 				Type: schema.TypeString,
 				Required: true,
-				ForceNew: false,
+				ForceNew: true,
 			},
 			"account_id": {
 				Type: schema.TypeString,
@@ -108,18 +108,25 @@ func resourceKeycloakAccountRead(ctx context.Context, data *schema.ResourceData,
 
 
 func resourceKeycloakAccountUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return diag.Diagnostics{{
-		Summary:  "Updating an Account is not yet supported",
-		Severity: diag.Warning,
-	}}
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+
+	account := mapFromDataToAccount(data)
+
+	err := keycloakClient.UpdateAccount(ctx, account)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	mapFromAccountToData(data, account)
+
+	return nil
 }
 
 func resourceKeycloakAccountDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	
-	return diag.Diagnostics{{
-		Summary:  "Updating an Account is not yet supported",
-		Severity: diag.Warning,
-	}}
+	keycloakClient := meta.(*keycloak.KeycloakClient)
+	realm_id := data.Get("realm_id").(string)
+	id := data.Get("account_id").(string)
+	return diag.FromErr(keycloakClient.DeleteAccount(ctx,realm_id,id))
 }
 
 func resourceKeycloakAccountImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {

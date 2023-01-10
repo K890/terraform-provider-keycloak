@@ -499,8 +499,51 @@ func (keycloakClient *KeycloakClient) put(ctx context.Context, path string, requ
 	return err
 }
 
+func (keycloakClient *KeycloakClient) putWithoutAdmin(ctx context.Context, path string, requestBody interface{}) error {
+	resourceUrl := keycloakClient.baseUrl + path
+
+	payload, err := keycloakClient.marshal(requestBody)
+	if err != nil {
+		return err
+	}
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodPut, resourceUrl, nil)
+	if err != nil {
+		return err
+	}
+
+	_, _, err = keycloakClient.sendRequest(ctx, request, payload)
+
+	return err
+}
+
 func (keycloakClient *KeycloakClient) delete(ctx context.Context, path string, requestBody interface{}) error {
 	resourceUrl := keycloakClient.baseUrl + apiUrl + path
+
+	var (
+		payload []byte
+		err     error
+	)
+
+	if requestBody != nil {
+		payload, err = keycloakClient.marshal(requestBody)
+		if err != nil {
+			return err
+		}
+	}
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodDelete, resourceUrl, nil)
+	if err != nil {
+		return err
+	}
+
+	_, _, err = keycloakClient.sendRequest(ctx, request, payload)
+
+	return err
+}
+
+func (keycloakClient *KeycloakClient) deleteWithoutAdmin(ctx context.Context, path string, requestBody interface{}) error {
+	resourceUrl := keycloakClient.baseUrl + path
 
 	var (
 		payload []byte
